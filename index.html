@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kamla Nagar Greens - Admin Panel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+    }
+
+    nav {
+      background: #2c3e50;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 8px;
+    }
+    .plot {
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    .plot:hover {
+      transform: scale(1.05);
+    }
+    .available {
+      background: linear-gradient(135deg, #a8e063, #56ab2f);
+      color: white;
+    }
+    .sold {
+      background: linear-gradient(135deg, #ff6a6a, #d32f2f);
+      color: white;
+    }
+
+    .legend {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+    }
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+    }
+    .legend .box {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+    }
+    .available-box {
+      background: #56ab2f;
+    }
+    .sold-box {
+      background: #d32f2f;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    .modal-content label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    .modal-content input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .modal-content .actions {
+      margin-top: 15px;
+      text-align: right;
+    }
+    .modal-content button {
+      padding: 8px 12px;
+      margin-left: 10px;
+    }
+
+    #plotNumber {
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <h1>Kamla Nagar Greens - Admin</h1>
+  </nav>
+
+  <div class="container">
+    <div class="legend">
+      <span><div class="box available-box"></div>Available</span>
+      <span><div class="box sold-box"></div>Sold</span>
+    </div>
+
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <p id="plotNumber"></p>
+      <form id="plotForm">
+        <label>
+          <input type="checkbox" id="soldCheckbox">
+          Mark as Sold
+        </label>
+        <label for="note">Name / Note:</label>
+        <input type="text" id="noteInput" placeholder="Enter name or note">
+        <div class="actions">
+          <button type="button" onclick="closeModal()">Cancel</button>
+          <button type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById("grid");
+    const modal = document.getElementById("modal");
+    const noteInput = document.getElementById("noteInput");
+    const soldCheckbox = document.getElementById("soldCheckbox");
+    const plotForm = document.getElementById("plotForm");
+    const plotNumber = document.getElementById("plotNumber");
+
+    let currentPlot = null;
+
+    // Static plots data
+    let plots = Array.from({ length: 536 }, (_, i) => ({
+      id: i + 1,
+      sold: false,
+      note: ""
+    }));
+
+    // Render plots
+    function renderPlots() {
+      grid.innerHTML = "";
+      plots.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "plot " + (p.sold ? "sold" : "available");
+        div.textContent = p.id;
+        div.title = p.note ? `Note: ${p.note}` : "";
+        div.onclick = () => openModal(p);
+        grid.appendChild(div);
+      });
+    }
+
+    // Open modal
+    function openModal(plot) {
+      currentPlot = plot;
+      plotNumber.textContent = `Plot Number: ${plot.id}`;
+      noteInput.value = plot.note || "";
+      soldCheckbox.checked = plot.sold;
+      modal.style.display = "flex";
+    }
+
+    // Close modal
+    function closeModal() {
+      modal.style.display = "none";
+      currentPlot = null;
+    }
+
+    // Submit form
+    plotForm.onsubmit = function (e) {
+      e.preventDefault();
+      if (!currentPlot) return;
+
+      currentPlot.sold = soldCheckbox.checked;
+      currentPlot.note = noteInput.value;
+
+      renderPlots();
+      closeModal();
+    };
+
+    // Initial render
+    renderPlots();
+  </script>
+
+</body>
+</html>
